@@ -69,13 +69,15 @@ class _MyHomePageState extends State<MyHomePage> {
               CupertinoButton(
                 onPressed: () async {
                   try {
-                    final image = await ImagePicker()
-                        .pickImage(source: ImageSource.camera);
+                    final image = await ImagePicker().pickImage(
+                      source: ImageSource.camera,
+                    );
                     if (image == null && !(await Permission.camera.isGranted)) {
                       await Permission.camera.request();
                     }
                     if (image != null) {
                       final imageBytes = await image.readAsBytes();
+                      if (!mounted) return;
                       setState(() {
                         imgUint = imageBytes;
                       });
@@ -92,32 +94,43 @@ class _MyHomePageState extends State<MyHomePage> {
                     child: Text(
                       'Take a photo',
                       style: AppTextStyle.body1.copyWith(
-                        color: AppColor.green0,
+                        color: AppColor.light4,
                       ),
                     ),
                   ),
                 ),
               ),
               CupertinoButton(
-                  child: Container(
-                    width: 200,
-                    height: 50,
-                    color: AppColor.green0,
-                  ),
-                  onPressed: () {
-                    MaterialPageRoute route = MaterialPageRoute(
-                      builder: (context) => ImageEditor(
-                        imagebyte: imgUint!,
-                        onConfirm: (imgBytes) {
-                          setState(() {
-                            imgUint = imgBytes;
-                          });
-                          Navigator.pop(context);
-                        },
+                onPressed: imgUint == null
+                    ? null
+                    : () {
+                        final route = MaterialPageRoute<void>(
+                          builder: (context) => ImageEditor(
+                            imagebyte: imgUint!,
+                            onConfirm: (imgBytes) {
+                              setState(() {
+                                imgUint = imgBytes;
+                              });
+                              Navigator.pop(context);
+                            },
+                          ),
+                        );
+                        Navigator.push(context, route);
+                      },
+                child: Container(
+                  width: 200,
+                  height: 50,
+                  color: imgUint == null ? AppColor.dark3 : AppColor.green0,
+                  child: Center(
+                    child: Text(
+                      'Edit photo',
+                      style: AppTextStyle.body1.copyWith(
+                        color: AppColor.light4,
                       ),
-                    );
-                    Navigator.push(context, route);
-                  })
+                    ),
+                  ),
+                ),
+              ),
             ],
           ),
         ),
